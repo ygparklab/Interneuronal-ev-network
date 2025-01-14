@@ -43,43 +43,44 @@ detect-blobs \
     [--padding-z <padding-z>]
 ```
 
-Parameters
-source-expr: GLOB expression for collecting .tiff files (e.g., /path/*.tiff).
-output: JSON file with X, Y, Z coordinates of detected cells.
-dog-low-sigma: Standard deviation for foreground Gaussian smoothing.
-dog-high-sigma: Standard deviation for background Gaussian smoothing.
-threshold: Absolute cutoff for peak detection.
-min-distance: Minimum distance in voxels between adjacent peaks.
-block-size-xy: Block size in X and Y directions for processing.
-block-size-z: Block size in Z direction for processing.
-padding-xy: Padding for X and Y directions.
-padding-z: Padding for Z direction.
+### Parameters
+source-expr: GLOB expression for collecting .tiff files (e.g., /path/*.tiff). <br/>
+output: JSON file with X, Y, Z coordinates of detected cells.<br/>
+dog-low-sigma: Standard deviation for foreground Gaussian smoothing.<br/>
+dog-high-sigma: Standard deviation for background Gaussian smoothing.<br/>
+threshold: Absolute cutoff for peak detection.<br/>
+min-distance: Minimum distance in voxels between adjacent peaks.<br/>
+block-size-xy: Block size in X and Y directions for processing.<br/>
+block-size-z: Block size in Z direction for processing.<br/>
+padding-xy: Padding for X and Y directions.<br/>
+padding-z: Padding for Z direction.<br/>
 
 
-collect-patches
+## collect-patches
 collect-patches extracts rectangular 2D patches around detected centers using coordinates provided by detect-blobs.
 
 ### Usage
 ```bash
-Copy code
 collect-patches \
     --source <source-expr> \
     --points <points> \
     --output <output> \
     [--patch-size <patch-size>] \
     [--n-cores <n-cores>]
-Parameters
-source-expr: GLOB expression for .tiff files.
-points: Input file from detect-blobs.
-output: HDF5 file containing patches and their coordinates.
-patch-size: Size of each patch (recommended odd number).
-n-cores: Number of parallel processes.
-eflash-train
+```
+
+### Parameters
+source-expr: GLOB expression for .tiff files.<br/>
+points: Input file from detect-blobs.<br/>
+output: HDF5 file containing patches and their coordinates.<br/>
+patch-size: Size of each patch (recommended odd number).<br/>
+n-cores: Number of parallel processes.<br/>
+
+## eflash-train
 eflash-train allows interactive training of a classifier using patches created by collect-patches. It uses dimensionality reduction and a random forest classifier.
 
-Usage
-bash
-Copy code
+### Usage
+```bash
 eflash-train \
     --patch-file <patch-file> \
     --output <output> \
@@ -87,14 +88,17 @@ eflash-train \
     [--port <port>] \
     [--bind-address <bind-address>] \
     [--static-content-source <static-content-source>]
-Parameters
-patch-file: Input file from collect-patches.
-output: File to save the trained model.
-neuroglancer: Optional Neuroglancer data source (e.g., precomputed://http://localhost:81).
-port: Port number for the Neuroglancer view.
-bind-address: IP address to bind Neuroglancer's listening port.
-static-content-source: URL for Neuroglancer's assets.
-GUI Commands
+```
+
+### Parameters
+patch-file: Input file from collect-patches.<br/>
+output: File to save the trained model.<br/>
+neuroglancer: Optional Neuroglancer data source (e.g., precomputed://http://localhost:81).<br/>
+port: Port number for the Neuroglancer view.<br/>
+bind-address: IP address to bind Neuroglancer's listening port.<br/>
+static-content-source: URL for Neuroglancer's assets.<br/>
+
+### GUI Commands
 File Menu
 Save (Ctrl+S): Save the model and ground truth.
 Write: Export positive coordinates to JSON.
