@@ -1,23 +1,29 @@
 # Interneuronal-ev-network
-Official code for NBML's "A brain-wide interneuronal network mediated by extracellular vesicle" paper.
-Also, this repository contains software delevoped in the Chung Lab's EFlash paper.
 
-The analysis pipeline has follow steps:
+Official code repository for NBML's **"A brain-wide interneuronal network mediated by extracellular vesicle"** paper.  
+This repository also contains software developed for the Chung Lab's **EFlash** paper.
 
-1. Find putative positive cells using detect-blobs
-2. Check whether the threshold is optimal using Fiji 
-3. Make a list of patches for training using collect-patches
-4. Generate mannually labeled ground truth data for a model using eflash-train (you can skit this as we offer a pre-trained model)
-5. Classify the patches with pre-trained model using cell_classification_new.py built by Pytorch
-6. Get a brain alignment file using Neuroglancer (Image_align_auto1.sh, image_align_auto2.sh)
-7. Co-positivity check using JupyterNotebook (if you need)
-8. Cell counting for each regions using count_cell_new.sh 
+## Analysis Pipeline
 
-### detect-blobs
-detect-blobs is a simple blob detector. It looks for peaks in the local maximum using a difference of gaussians followed by a simple static thresholding of points found to have higher signal than their neighbors.
+1. Find putative positive cells using `detect-blobs`.
+2. Check whether the threshold is optimal using Fiji.
+3. Make a list of patches for training using `collect-patches`.
+4. Generate manually labeled ground truth data for a model using `eflash-train` (optional, as a pre-trained model is provided).
+5. Classify the patches with the pre-trained model using `cell_classification_new.py` (built by PyTorch).
+6. Get a brain alignment file using Neuroglancer (`Image_align_auto1.sh`, `Image_align_auto2.sh`).
+7. Perform co-positivity analysis using Jupyter Notebook (if needed).
+8. Count cells for each region using `count_cell_new.sh`.
+9. Post-process results using `makeCSV` and `sort_colormap.ipynb`.
 
-Usage:
+---
 
+## detect-blobs
+
+`detect-blobs` is a simple blob detector. It identifies peaks in the local maximum using a difference of Gaussians followed by a static threshold.
+
+### Usage
+
+```bash
 detect-blobs \
     --source <source-expr> \
     --output <coords-file> \
@@ -36,55 +42,43 @@ detect-blobs \
     [--padding-xy <padding-xy>] \
     [--padding-z <padding-z>]
 
-Where
+Parameters
+source-expr: GLOB expression for collecting .tiff files (e.g., /path/*.tiff).
+output: JSON file with X, Y, Z coordinates of detected cells.
+dog-low-sigma: Standard deviation for foreground Gaussian smoothing.
+dog-high-sigma: Standard deviation for background Gaussian smoothing.
+threshold: Absolute cutoff for peak detection.
+min-distance: Minimum distance in voxels between adjacent peaks.
+block-size-xy: Block size in X and Y directions for processing.
+block-size-z: Block size in Z direction for processing.
+padding-xy: Padding for X and Y directions.
+padding-z: Padding for Z direction.
 
-source-expr is a GLOB expression for collecting the .tiff files that make up the stack. For instance "/home/alice/myfiles/*.tiff".
-output is the name of the output file. This will be a json-encoded list of lists where the inner list has the X, Y and Z coordinates of a putatitive cell in that order.
-dog-low-sigma is the standard deviation of the Gaussian used to smooth the foreground of the image.
-dog-low-sigma-xy and dog-low-sigma-z are the foreground standard deviations in the X/Y and Z directions if the volume is anisotropic
-dog-high-sigma is the standard deviation of the Gaussian used to smooth the background of the image. The smoothed background is subtracted from the smoothed foreground to get the difference of Gaussians (dog).
-dog-high-sigma-xy and dog-high-sigma-z are the background standard deviations in the X/Y and Z directions if the volume is anisotropic
-threshold is the absolute cutoff for peak finding. Any peak must have a value above this threshold in the difference of Gaussians.
-min-distance is the minimum distance in voxels between adjacent peaks. The peak with the higher intensity is chosen if two are within this distance. Large minimum distances can be computationally expensive.
-min-distance-xy and min-distance-z are the minimum distances in the X/Y and Z directions if the volume is anisotropic
-block-size-xy is the size of a processing block in the X and Y direction. The block size (block-size-xy * block-size-xy * block-size-z) times the number of cores times 8 should be less than your memory size.
-block-size-z is the size of a processing block in the Z direction
-padding-xy is the amount of padding on the x and y sides of a block. It should be large enough for the larger Gaussian to be properly computed.
-padding-z is the amount of padding in the Z direction above and below a block.
 
-### collect-patches
-collect-patches assembles rectangular 2D patches around the vicinity of detected putatitive centers as detected by detect-blobs.
+collect-patches
+collect-patches extracts rectangular 2D patches around detected centers using coordinates provided by detect-blobs.
 
-Usage:
-
+### Usage
+```bash
+Copy code
 collect-patches \
     --source <source-expr> \
     --points <points> \
     --output <output> \
     [--patch-size <patch-size>] \
     [--n-cores <n-cores>]
-Where
+Parameters
+source-expr: GLOB expression for .tiff files.
+points: Input file from detect-blobs.
+output: HDF5 file containing patches and their coordinates.
+patch-size: Size of each patch (recommended odd number).
+n-cores: Number of parallel processes.
+eflash-train
+eflash-train allows interactive training of a classifier using patches created by collect-patches. It uses dimensionality reduction and a random forest classifier.
 
-source-expr is a glob expression to collect the .tiff files in the stack (see detect-blobs)
-points is the file output by detect-blobs
-output is the HDF5 file containing the patches and their coordinates. The file has four datasets,
-patches - an N * M * M sized array where N is the number of points and M is the patch size.
-x the X coordinates of each of the N points
-y the Y coordinates of each of the N points
-z the Z coordinates of each of the N points
-patch-size - the size of the patch centered on each point. This should be an odd number so that the same number of pixels are to the left and right of the center point.
-n-cores - the number of simultaneous parallel processes to spawn. This should be fewer than the number of CPUs on your machine and might be substantially fewer if the machine has a low I/O bandwidth to the data source.
-
-### eflash-train
-eflash-train is an interactive program that lets the user train a classifier based on the patches output by collect-patches
-
-Technical details
-eflash-train first applies dimensionality reduction to the raw patch data. It creates a flat array per patch and then finds the first 24 principal components of the patch data. This creates a feature bank of 24 features.
-
-The features are then used, along with the user's classification of a small number of examples, to train a random forest classifier. This classifier is then used to predict whether each putative cell is a true cell or false positive.
-
-Usage:
-
+Usage
+bash
+Copy code
 eflash-train \
     --patch-file <patch-file> \
     --output <output> \
@@ -92,29 +86,29 @@ eflash-train \
     [--port <port>] \
     [--bind-address <bind-address>] \
     [--static-content-source <static-content-source>]
-where
-
-patch-file is the name of the file produced by collect-patches
-output is the name of the model file to be generated
-neuroglancer is the name of a Neuroglancer data source, for instance, "precomputed://http://localhost:81". This is optional, but if present, eflash-train will present a Neuroglancer view and will reposition the view at the current cell every time a new cell is selected.
-port is the port number on which to launch the Neuroglancer view. By default, any available port is selected.
-bind-address is the IP address to bind Neuroglancer's listening port to. By default, this is the loopback address, "localhost".
-static-content-source is the static content source server URL for Neuroglancer's assets. By default, this is the Neuroglancer demo server. See the neuroglancer documentation for details on the demo server.
-The GUI has the following menu commands:
-
-File
-Save (ctrl + S) saves the output model file. This also saves the positive and negative ground-truth so that you can restart the session where you left off.
-Write writes the coordinates classified as positive to a points .json file.
-Train (T) trains the model.
-Quit shuts the program down
-Image
-Next (X) displays a random unclassified patch for user classification
-Next Positive (ctrl+P) displays a random unclassified patch that the model believes is positive.
-Next Negative (ctrl+N) displays a random unclassified patch that the model believes is negative.
-Next Unsure (U) displays a random unclassified patch that the model predicts as positive or negative with roughly equal probability.
-Mark
-Positive Mark the currently displayed patch as a positive example
-Negative Mark the currently displayed patch as a negative example
-In a typical training session, a user first classifies 10-20 cells using Image->Next followed by Mark->Positive or Mark->Negative as appropriate. After that, the user trains a model using File->Train and then classifies 10-20 unsure patches (using Image->Next Unsure and Mark->Positive and Negative). The user then retrains and classifies another 10-20 unsure patches. Periodically, the user can scan some representative patches classified as positive or negative using Image->Next Positive or Negative, verifying the accuracy by eye. Generally, too few images will be classified to calculate reasonable statistics for the model's accuracy, e.g. through out-of-bag error.
-
-
+Parameters
+patch-file: Input file from collect-patches.
+output: File to save the trained model.
+neuroglancer: Optional Neuroglancer data source (e.g., precomputed://http://localhost:81).
+port: Port number for the Neuroglancer view.
+bind-address: IP address to bind Neuroglancer's listening port.
+static-content-source: URL for Neuroglancer's assets.
+GUI Commands
+File Menu
+Save (Ctrl+S): Save the model and ground truth.
+Write: Export positive coordinates to JSON.
+Train: Train the model.
+Quit: Exit the program.
+Image Menu
+Next (X): Show an unclassified patch.
+Next Positive (Ctrl+P): Show a patch predicted as positive.
+Next Negative (Ctrl+N): Show a patch predicted as negative.
+Next Unsure (U): Show a patch with low prediction confidence.
+Mark Menu
+Positive: Mark the patch as positive.
+Negative: Mark the patch as negative.
+Training Workflow
+Classify ~10-20 cells using Image → Next and mark as Positive or Negative.
+Train the model using File → Train.
+Classify unsure patches using Image → Next Unsure.
+Repeat until sufficient accuracy is achieved.
