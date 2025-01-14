@@ -44,20 +44,20 @@ detect-blobs \
 ```
 
 ### Parameters
-source-expr: GLOB expression for collecting .tiff files (e.g., /path/*.tiff). <br/>
-output: JSON file with X, Y, Z coordinates of detected cells.<br/>
-dog-low-sigma: Standard deviation for foreground Gaussian smoothing.<br/>
-dog-high-sigma: Standard deviation for background Gaussian smoothing.<br/>
-threshold: Absolute cutoff for peak detection.<br/>
-min-distance: Minimum distance in voxels between adjacent peaks.<br/>
-block-size-xy: Block size in X and Y directions for processing.<br/>
-block-size-z: Block size in Z direction for processing.<br/>
-padding-xy: Padding for X and Y directions.<br/>
-padding-z: Padding for Z direction.<br/>
+* source-expr: GLOB expression for collecting .tiff files (e.g., /path/*.tiff). <br/>
+* output: JSON file with X, Y, Z coordinates of detected cells.<br/>
+* dog-low-sigma: Standard deviation for foreground Gaussian smoothing.<br/>
+* dog-high-sigma: Standard deviation for background Gaussian smoothing.<br/>
+* threshold: Absolute cutoff for peak detection.<br/>
+* min-distance: Minimum distance in voxels between adjacent peaks.<br/>
+* block-size-xy: Block size in X and Y directions for processing.<br/>
+* block-size-z: Block size in Z direction for processing.<br/>
+* padding-xy: Padding for X and Y directions.<br/>
+* padding-z: Padding for Z direction.<br/>
 
 
 ## collect-patches
-collect-patches extracts rectangular 2D patches around detected centers using coordinates provided by detect-blobs.
+`collect-patches` extracts rectangular 2D patches around detected centers using coordinates provided by detect-blobs.
 
 ### Usage
 ```bash
@@ -70,14 +70,14 @@ collect-patches \
 ```
 
 ### Parameters
-source-expr: GLOB expression for .tiff files.<br/>
-points: Input file from detect-blobs.<br/>
-output: HDF5 file containing patches and their coordinates.<br/>
-patch-size: Size of each patch (recommended odd number).<br/>
-n-cores: Number of parallel processes.<br/>
+* source-expr: GLOB expression for .tiff files.<br/>
+* points: Input file from detect-blobs.<br/>
+* output: HDF5 file containing patches and their coordinates.<br/>
+* patch-size: Size of each patch (recommended odd number).<br/>
+* n-cores: Number of parallel processes.<br/>
 
 ## eflash-train
-eflash-train allows interactive training of a classifier using patches created by collect-patches. It uses dimensionality reduction and a random forest classifier.
+`eflash-train` allows interactive labeling for ground-truth using patches created by collect-patches.
 
 ### Usage
 ```bash
@@ -91,29 +91,32 @@ eflash-train \
 ```
 
 ### Parameters
-patch-file: Input file from collect-patches.<br/>
-output: File to save the trained model.<br/>
-neuroglancer: Optional Neuroglancer data source (e.g., precomputed://http://localhost:81).<br/>
-port: Port number for the Neuroglancer view.<br/>
-bind-address: IP address to bind Neuroglancer's listening port.<br/>
-static-content-source: URL for Neuroglancer's assets.<br/>
+* patch-file: Input file from collect-patches.<br/>
+* output: File to save the trained model.<br/>
+* neuroglancer: Optional Neuroglancer data source (e.g., precomputed://http://localhost:81).<br/>
+* port: Port number for the Neuroglancer view.<br/>
+* bind-address: IP address to bind Neuroglancer's listening port.<br/>
+* static-content-source: URL for Neuroglancer's assets.<br/>
 
 ### GUI Commands
-File Menu
-Save (Ctrl+S): Save the model and ground truth.
-Write: Export positive coordinates to JSON.
-Train: Train the model.
-Quit: Exit the program.
-Image Menu
-Next (X): Show an unclassified patch.
-Next Positive (Ctrl+P): Show a patch predicted as positive.
-Next Negative (Ctrl+N): Show a patch predicted as negative.
-Next Unsure (U): Show a patch with low prediction confidence.
-Mark Menu
-Positive: Mark the patch as positive.
-Negative: Mark the patch as negative.
-Training Workflow
-Classify ~10-20 cells using Image → Next and mark as Positive or Negative.
-Train the model using File → Train.
-Classify unsure patches using Image → Next Unsure.
-Repeat until sufficient accuracy is achieved.
+* File Menu
+- Save (Ctrl+S): Save the model and ground truth.
+- Write: Export positive coordinates to JSON.
+- Train: Train the model.
+- Quit: Exit the program.
+
+* Image Menu
+- Next (X): Show an unclassified patch.
+- Next Positive (Ctrl+P): Show a patch predicted as positive.
+- Next Negative (Ctrl+N): Show a patch predicted as negative.
+- Next Unsure (U): Show a patch with low prediction confidence.
+
+* Mark Menu
+- Positive: Mark the patch as positive.
+- Negative: Mark the patch as negative.
+
+* Training Workflow
+- Classify ~10-20 cells using Image → Next and mark as Positive or Negative.
+- Train the model using File → Train.
+- Classify unsure patches using Image → Next Unsure.
+- Repeat until sufficient accuracy is achieved.
