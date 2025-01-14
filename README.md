@@ -41,6 +41,7 @@ detect-blobs \
     [--block-size-z <block-size-z>] \
     [--padding-xy <padding-xy>] \
     [--padding-z <padding-z>]
+'''
 
 Parameters
 source-expr: GLOB expression for collecting .tiff files (e.g., /path/*.tiff).
