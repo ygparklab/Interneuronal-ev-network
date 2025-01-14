@@ -116,6 +116,7 @@ eflash-train \
   - Negative: Mark the patch as negative.
 
 * Training Workflow
+  - Note that training process here is only for supporting the ground-truth labeling process, and trained model is not used for the final classification result.  
   - Classify ~10-20 cells using Image → Next and mark as Positive or Negative.
   - Train the model using File → Train.
   - Classify unsure patches using Image → Next Unsure.
