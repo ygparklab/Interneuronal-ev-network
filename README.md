@@ -100,23 +100,23 @@ eflash-train \
 
 ### GUI Commands
 * File Menu
-- Save (Ctrl+S): Save the model and ground truth.
-- Write: Export positive coordinates to JSON.
-- Train: Train the model.
-- Quit: Exit the program.
+  - Save (Ctrl+S): Save the model and ground truth.
+  - Write: Export positive coordinates to JSON.
+  - Train: Train the model.
+  - Quit: Exit the program.
 
 * Image Menu
-- Next (X): Show an unclassified patch.
-- Next Positive (Ctrl+P): Show a patch predicted as positive.
-- Next Negative (Ctrl+N): Show a patch predicted as negative.
-- Next Unsure (U): Show a patch with low prediction confidence.
+  - Next (X): Show an unclassified patch.
+  - Next Positive (Ctrl+P): Show a patch predicted as positive.
+  - Next Negative (Ctrl+N): Show a patch predicted as negative.
+  - Next Unsure (U): Show a patch with low prediction confidence.
 
 * Mark Menu
-- Positive: Mark the patch as positive.
-- Negative: Mark the patch as negative.
+  - Positive: Mark the patch as positive.
+  - Negative: Mark the patch as negative.
 
 * Training Workflow
-- Classify ~10-20 cells using Image → Next and mark as Positive or Negative.
-- Train the model using File → Train.
-- Classify unsure patches using Image → Next Unsure.
-- Repeat until sufficient accuracy is achieved.
+  - Classify ~10-20 cells using Image → Next and mark as Positive or Negative.
+  - Train the model using File → Train.
+  - Classify unsure patches using Image → Next Unsure.
+  - Repeat until sufficient accuracy is achieved.
